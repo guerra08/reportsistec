@@ -312,7 +312,6 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 			WHERE cmc.timemodified between $startdate and $enddate
 			and cmc.completionstate = '1' and  m.name = 'simplecertificate' and cm.course = '".$id."'
 			and u.id = cmc.userid and cmc.coursemoduleid = cm.id and cm.module = m.id
-			ORDER BY u.firstname, u.lastname
 			";
 	/* FIM DO NOSSO SQL */
 	//print_r($DB->get_records_sql($sql));
@@ -354,34 +353,39 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 		$cpf = str_replace(" ", "", $cpf);
 
 		if(isset($_GET['cpf']) && $_GET['cpf'] == 1){
-			if($cpf == ''){
-				$data = array ();
-			}
-			else{
-				$data = array ($u->firstname.' '.$u->lastname, $cpf, date('d-m-Y H:i:s', $u->timemodified));
+      if(isset($_GET['dataconclusao']) && $_GET['dataconclusao'] == 1){
+        if($cpf == "")
+          unset ($data);
+        if(isset($data))
+        $data = array ($u->firstname.' '.$u->lastname, $cpf, date('d-m-Y H:i:s', $u->timemodified));
+      }
+      else{
+        if($cpf == "")
+          unset ($data);
+        if(isset($data))
+        $data = array ($u->firstname.' '.$u->lastname, $cpf);
+      }
+    }
+    else{
+      if(isset($_GET['dataconclusao']) && $_GET['dataconclusao'] == 1){
+        $data = array ($u->firstname.' '.$u->lastname, $cpf, date('d-m-Y H:i:s', $u->timemodified));
+      }
+      else{
+        $data = array ($u->firstname.' '.$u->lastname, $cpf);
+      }
+    }
 				$cpfs.=$cpf.';';
-			}
-		}
-		else{
-			$data = array ($u->firstname.' '.$u->lastname, $cpf, date('d-m-Y H:i:s', $u->timemodified));
-			$cpfs.=$cpf.';';
-		}
-
-		if(isset($_GET['dataconclusao']) && $_GET['dataconclusao'] == 1){
-			$data = array ($u->firstname.' '.$u->lastname, $cpf, date('d-m-Y H:i:s', $u->timemodified));
-		}
-		else{
-			unset($table->headers[2]);
-			$data = array ($u->firstname.' '.$u->lastname, $cpf,);
-		}
-
+        //print_r($data);
 		/*
         $data = array('<a href="'.$CFG->wwwroot.'/user/view.php?id='.$u->userid.'&amp;course='.$course->id.'">'.fullname($u,true).'</a>'."\n",
                       ((!empty($u->count)) ? get_string('yes').' ('.$u->count.') ' : get_string('no')),
                       '<input type="checkbox" class="usercheckbox" name="user'.$u->userid.'" value="'.$u->count.'" />'."\n",
                       );*/
+        if(isset($data))
         $table->add_data($data);
+        else{}
     }
+}
 
     $table->print_html();
 	echo "CPF: ".$cpfs;
@@ -411,6 +415,5 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
     echo '</div>'."\n";
 */
     $PAGE->requires->js_init_call('M.report_sistec.init');
-}
 
 echo $OUTPUT->footer();
