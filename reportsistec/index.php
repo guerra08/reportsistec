@@ -280,8 +280,8 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
         $sql .= ' ORDER BY '.$table->get_sql_sort();
     }
 
-	
-	
+
+
     $countsql = "SELECT COUNT(DISTINCT(ra.userid))
                    FROM {role_assignments} ra
                    JOIN {user} u ON u.id = ra.userid
@@ -306,17 +306,17 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 	/* NOSSO SQL */
 	$startdate = (isset($_GET['startdate'])) ? mktime(0,0,0,substr($_GET['startdate'],5,2),substr($_GET['startdate'],8,2),substr($_GET['startdate'],0,4)) : time()-60*60*24*30;
 	$enddate = (isset($_GET['enddate'])) ? mktime(0,0,0,substr($_GET['enddate'],5,2),substr($_GET['enddate'],8,2),substr($_GET['enddate'],0,4)) : time();
-	
-	$sql = "SELECT cmc.userid, u.firstname, u.lastname, cmc.timemodified 
+
+	$sql = "SELECT cmc.userid, u.firstname, u.lastname, cmc.timemodified
 			FROM {user} u, {course_modules_completion} cmc, {course_modules} cm, {modules} m
-			WHERE cmc.timemodified between $startdate and $enddate 
+			WHERE cmc.timemodified between $startdate and $enddate
 			and cmc.completionstate = '1' and  m.name = 'simplecertificate' and cm.course = '".$id."'
 			and u.id = cmc.userid and cmc.coursemoduleid = cm.id and cm.module = m.id
 			ORDER BY u.firstname, u.lastname
 			";
 	/* FIM DO NOSSO SQL */
 	//print_r($DB->get_records_sql($sql));
-	
+
     if (!$users = $DB->get_records_sql($sql)) {
         $users = array(); // tablelib will handle saying 'Nothing to display' for us.
     }
@@ -341,8 +341,8 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 
 	$cpfs = "";
     foreach ($users as $u) {
-		$sql = "SELECT ud.data 
-		FROM {user_info_data} ud 
+		$sql = "SELECT ud.data
+		FROM {user_info_data} ud
 		JOIN {user_info_field} uf ON uf.id = ud.fieldid
 		WHERE ud.userid = :userid AND uf.shortname = :fieldname";
 		$params = array('userid' =>  $u->userid, 'fieldname' => 'CPF');
@@ -351,8 +351,8 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 		$cpf = str_replace(".", "", $cpf);
 		$cpf = str_replace("-", "", $cpf);
 		$cpf = str_replace(",", "", $cpf);
-		$cpf = str_replace(" ", "", $cpf);	
-		
+		$cpf = str_replace(" ", "", $cpf);
+
 		if(isset($_GET['cpf']) && $_GET['cpf'] == 1){
 			if($cpf == ''){
 				$data = array ();
@@ -362,11 +362,11 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 				$cpfs.=$cpf.';';
 			}
 		}
-		else{	
+		else{
 			$data = array ($u->firstname.' '.$u->lastname, $cpf, date('d-m-Y H:i:s', $u->timemodified));
 			$cpfs.=$cpf.';';
 		}
-		
+
 		if(isset($_GET['dataconclusao']) && $_GET['dataconclusao'] == 1){
 			$data = array ($u->firstname.' '.$u->lastname, $cpf, date('d-m-Y H:i:s', $u->timemodified));
 		}
@@ -374,7 +374,7 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 			unset($table->headers[2]);
 			$data = array ($u->firstname.' '.$u->lastname, $cpf,);
 		}
-		
+
 		/*
         $data = array('<a href="'.$CFG->wwwroot.'/user/view.php?id='.$u->userid.'&amp;course='.$course->id.'">'.fullname($u,true).'</a>'."\n",
                       ((!empty($u->count)) ? get_string('yes').' ('.$u->count.') ' : get_string('no')),
@@ -415,4 +415,4 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 
 echo $OUTPUT->footer();
 
-
+//Bruno Guerra
