@@ -214,8 +214,8 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
     $table = new flexible_table('course-sistec-'.$course->id.'-'.$cm->id.'-'.$roleid);
     $table->course = $course;
 
-    $table->define_columns(array('fullname','count','select'));
-    $table->define_headers(array(get_string('user'),'CPF','Data da conclusão'));
+    $table->define_columns(array('fullname','count','select', 'text'));
+    $table->define_headers(array(get_string('user'),'CPF','Data da conclusão', 'Data de inscrição no curso'));
     $table->define_baseurl($baseurl);
 
     $table->set_attribute('cellpadding','5');
@@ -352,7 +352,7 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 		$cpf = str_replace(",", "", $cpf);
 		$cpf = str_replace(" ", "", $cpf);
 
-		if(isset($_GET['cpf']) && $_GET['cpf'] == 1){
+    if(isset($_GET['cpf']) && $_GET['cpf'] == 1){
       if(isset($_GET['dataconclusao']) && $_GET['dataconclusao'] == 1){
         if($cpf == "")
           unset ($data);
@@ -387,8 +387,10 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
     }
 }
 
-    $table->print_html();
-	echo "CPF: ".$cpfs;
+    if(isset($table)&isset($cpf)){
+      $table->print_html();
+      echo "CPF: ".$cpfs;
+    }
     /*if ($perpage == SHOW_ALL_PAGE_SIZE) {
         echo '<div id="showall"><a href="'.$baseurl.'&amp;perpage='.DEFAULT_PAGE_SIZE.'">'.get_string('showperpage', '', DEFAULT_PAGE_SIZE).'</a></div>'."\n";
     }
