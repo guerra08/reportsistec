@@ -414,3 +414,5 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 }
 
 echo $OUTPUT->footer();
+
+//test
