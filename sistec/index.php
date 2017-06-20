@@ -419,3 +419,5 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
     $PAGE->requires->js_init_call('M.report_sistec.init');
 
 echo $OUTPUT->footer();
+
+//Changes made until 11:20, 20/06
