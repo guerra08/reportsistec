@@ -158,16 +158,29 @@ echo html_writer::select($instanceoptions, 'instanceid', $instanceid);
 echo '<label for="menutimefrom">'.get_string('lookback').'</label>'."\n";
 echo html_writer::select($timeoptions,'timefrom',$timefrom);*/
 echo '<input type="hidden" name="roleid" value="1" />'."\n";
+echo "<div id ='datas'>";
 echo '<input type="date" name="startdate" />'."\n";
 echo '<input type="date" name="enddate" />'."\n";
+echo "</div>";
 echo '<input type="checkbox" name="cpf" value = "1" /> CPFs válidos '."\n";
 echo '<input type="checkbox" name="dataconclusao" value = "1" />Mostrar data de conclusão'."\n";
+echo '<input type="checkbox" id= "diadehj" name="diadehj" value = "1" />Apenas para a data atual'."\n";
 /*
 echo html_writer::select($roleoptions,'roleid',$roleid,false);
 echo '<label for="menuaction">'.get_string('showactions').'</label>'."\n";
 echo html_writer::select($actionoptions,'action',$action,false);*/
 echo '<input type="submit" value="'.get_string('go').'" />';
 echo "\n</div></form>\n";
+
+echo '<script type="text/javascript">
+        $(document).ready(function () {
+        $("#datas").show();
+        $("#diadehj").click(function () {
+          $("#datas").hide();
+        });
+        });
+    </script>';
+
 
 $baseurl =  $CFG->wwwroot.'/report/sistec/index.php?id='.$course->id.'&amp;roleid='
     .$roleid.'&amp;timefrom='.$timefrom.'&amp;action='.$action.'&amp;perpage='.$perpage;
@@ -419,5 +432,3 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
     $PAGE->requires->js_init_call('M.report_sistec.init');
 
 echo $OUTPUT->footer();
-
-//Changes made until 11:20, 20/06
