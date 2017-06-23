@@ -164,7 +164,7 @@ echo '<input type="date" name="enddate" />'."\n";
 echo "</div>";
 echo '<input type="checkbox" name="cpf" value = "1" /> CPFs válidos '."\n";
 echo '<input type="checkbox" name="dataconclusao" value = "1" />Mostrar data de conclusão'."\n";
-echo '<input type="checkbox" id= "diadehj" name="diadehj" value = "1" />Apenas para a data atual'."\n";
+echo '<input type="checkbox" onclick="hideDays()" id= "diadehj" name="diadehj" value = "1" />Apenas para a data atual'."\n";
 /*
 echo html_writer::select($roleoptions,'roleid',$roleid,false);
 echo '<label for="menuaction">'.get_string('showactions').'</label>'."\n";
@@ -173,12 +173,14 @@ echo '<input type="submit" value="'.get_string('go').'" />';
 echo "\n</div></form>\n";
 
 echo '<script type="text/javascript">
-        $(document).ready(function () {
-        $("#datas").show();
-        $("#diadehj").click(function () {
-          $("#datas").hide();
-        });
-        });
+          function hideDays() {
+          if (document.getElementById("diadehj").checked)
+         {
+             document.getElementById("datas").style.display = "none";
+         } else {
+             document.getElementById("datas").style.display = "block";
+         }
+        }
     </script>';
 
 
@@ -319,6 +321,17 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 	/* NOSSO SQL */
 	$startdate = (isset($_GET['startdate'])) ? mktime(0,0,0,substr($_GET['startdate'],5,2),substr($_GET['startdate'],8,2),substr($_GET['startdate'],0,4)) : time()-60*60*24*30;
 	$enddate = (isset($_GET['enddate'])) ? mktime(0,0,0,substr($_GET['enddate'],5,2),substr($_GET['enddate'],8,2),substr($_GET['enddate'],0,4)) : time();
+
+  if(isset($_GET['diadehj']) && $_GET['diadehj'] == 1){
+    $dataInicial = Date('d-m-Y');
+    $valorInicial = new DateTime($dataInicial);
+    $valorInicial->setTime(0,0,0);
+
+    $dataFinal = new DateTime("tomorrow");
+
+    $startdate = $valorInicial->getTimestamp(); echo'<br>';
+    $enddate = $dataFinal->getTimestamp();
+  }
 
 	$sql = "SELECT cmc.userid, u.firstname, u.lastname, cmc.timemodified
 			FROM {user} u, {course_modules_completion} cmc, {course_modules} cm, {modules} m
