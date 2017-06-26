@@ -1,4 +1,5 @@
 <?php
+echo '<link rel="stylesheet" href="styles.css" type="text/css">';
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -138,12 +139,16 @@ echo '<label for="menutimefrom">'.get_string('lookback').'</label>'."\n";
 echo html_writer::select($timeoptions,'timefrom',$timefrom);*/
 echo '<input type="hidden" name="roleid" value="1" />'."\n";
 echo "<div id ='datas'>";
-echo '<input type="date" name="startdate" />'."\n";
-echo '<input type="date" name="enddate" />'."\n";
+echo "<label for = 'startdate'>Data de início: ";
+echo '<input type="date" name="startdate" />'."\n </label>";
+echo "<label for = 'enddate'>Data final: ";
+echo '<input type="date" name="enddate" />'."\n </label>";
 echo "</div>";
+echo "<div id ='checklists'>";
 echo '<input type="checkbox" name="cpf" value = "1" /> CPFs válidos '."\n";
 echo '<input type="checkbox" name="dataconclusao" value = "1" />Mostrar datas'."\n";
-echo '<input type="checkbox" onclick="hideDays()" id= "diadehj" name="diadehj" value = "1" />Apenas para a data atual'."\n";
+echo '<input type="checkbox" onclick="hideDays()" id= "diadehj" name="diadehj" value = "1" />Apenas para a data atual'."\n<br>";
+echo "</div>";
 /*
 echo html_writer::select($roleoptions,'roleid',$roleid,false);
 echo '<label for="menuaction">'.get_string('showactions').'</label>'."\n";
@@ -375,7 +380,7 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 }
     if(isset($table)&isset($cpf)){
       $table->print_html();
-      echo "CPF: ".$cpfs;
+      echo "<p id = 'cpf'> CPF: ".$cpfs."</p>";
     }
     /*if ($perpage == SHOW_ALL_PAGE_SIZE) {
         echo '<div id="showall"><a href="'.$baseurl.'&amp;perpage='.DEFAULT_PAGE_SIZE.'">'.get_string('showperpage', '', DEFAULT_PAGE_SIZE).'</a></div>'."\n";
