@@ -1,5 +1,5 @@
 <?php
-echo '<link rel="stylesheet" href="styles.css" type="text/css">';
+echo '<link rel="stylesheet" href="stylesSistec.css" type="text/css">';
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -287,11 +287,10 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
     $startdate = $valorInicial->getTimestamp(); echo'<br>';
     $enddate = $dataFinal->getTimestamp();
   }
-	$sql = "SELECT cmc.userid, u.firstname, u.lastname, cmc.timemodified, e.id, e.courseid, ue.userid, ue.enrolid, ue.timestart
-			FROM {user} u, {course_modules_completion} cmc, {course_modules} cm, {modules} m, {enrol} e, {user_enrolments} ue
-			WHERE cmc.timemodified between $startdate and $enddate
-			and cmc.completionstate = '1' and  m.name = 'simplecertificate' and cm.course = '".$id."'
-			and u.id = cmc.userid and cmc.coursemoduleid = cm.id and cm.module = m.id and e.courseid = cm.course and cmc.userid = ue.userid and ue.enrolid = e.id
+	$sql = "SELECT cmc.userid, u.firstname, u.lastname, cc.timecompleted, e.id, e.courseid, ue.userid, ue.enrolid, ue.timestart
+			FROM {user} u, {course_completions} cc, {enrol} e, {user_enrolments} ue
+			WHERE cmc.timecompleted between $startdate and $enddate
+			cc.course = '".$id."' and u.id = cc.userid and ue.enrolid = e.id	
 			";
 	/* FIM DO NOSSO SQL */
 	//print_r($DB->get_records_sql($sql));
