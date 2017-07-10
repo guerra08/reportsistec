@@ -433,10 +433,12 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
     }
 
     if(isset($_GET['tudo']) && $_GET['tudo'] == 1){
+      $usersArray = array();
       foreach ($groups as $group) {
         echo $group[0]->shortname.'<br>';
         foreach ($group as $users) {
-          echo "<pre>";print_r ($users); echo "</pre>";
+          $usersArray = (array) $users;
+          echo "<pre>";print_r ($usersArray); echo "</pre>";
         }
       }
     }
