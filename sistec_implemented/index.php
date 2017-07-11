@@ -163,6 +163,7 @@ echo '<input type="date" name="startdate" />'."\n";
 echo '<input type="date" name="enddate" />'."\n";
 echo '<input type="checkbox" name="cpf" value = "1" /> CPFs válidos '."\n";
 echo '<input type="checkbox" name="dia" value = "1" /> Conclusão '."\n";
+echo '<input type="checkbox" name="tudo" value = "1" /> Todos os cursos '."\n";
 /*
 echo html_writer::select($roleoptions,'roleid',$roleid,false);
 echo '<label for="menuaction">'.get_string('showactions').'</label>'."\n";
@@ -324,7 +325,7 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 			and u.id = cc.userid and cc.course = c.id
 			ORDER BY c.shortname, u.firstname, u.lastname
 			";*/
-      $sql =   "SELECT u.firstname,
+      $sql =   "SELECT * FROM (SELECT u.firstname,
                 u.lastname,
                 c.shortname,
                 cc.timecompleted,
@@ -334,6 +335,7 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
                 JOIN {course} c ON c.id = cc.course
                 JOIN {user} u ON u.id = cc.userid
                 WHERE cc.timecompleted between $startdate and $enddate
+                ORDER BY c.shortname) AS secondQuery
                 ";
 	}else{
 		$sql = "SELECT cc.userid, u.firstname, u.lastname, cc.timecompleted
@@ -352,19 +354,9 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
         $users = array(); // tablelib will handle saying 'Nothing to display' for us.
     }
 
+    echo "<pre>";print_r($users);echo "</pre>";
+
 	   //echo count($users);
-
-     if(isset($_GET['tudo'])&& $_GET['tudo'] == 1){
-
-        $groups = array();
-
-        foreach ($users as $arrayUser) {
-           $groups[$arrayUser->shortname][] = $arrayUser;
-        }
-
-        ksort($groups);
-
-    }
 
     $data = array();
 
@@ -413,13 +405,13 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 
 		$inscricao = (isset($_GET["dia"]) && $_GET["dia"] == 1) ? date('d/m/Y H:i:s', $u->timecompleted): "";
 
-		/*if($tudo == 1){
+		if($tudo == 1){
 			if($cursoid != $u->course){
 				$cursoid = $u->course;
 				$data = array('<b>'.$u->shortname.'</b>',$u->course,'-');
 				$table->add_data($data);
 			}
-		}*/
+		}
 
 		$data = array ($cpf, $u->firstname.' '.$u->lastname, $inscricao);
 		$cpfs.=$cpf.'; ';
@@ -430,17 +422,6 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
                       '<input type="checkbox" class="usercheckbox" name="user'.$u->userid.'" value="'.$u->count.'" />'."\n",
                       );*/
         $table->add_data($data);
-    }
-
-    if(isset($_GET['tudo']) && $_GET['tudo'] == 1){
-      $usersArray = array();
-      foreach ($groups as $group) {
-        echo $group[0]->shortname.'<br>';
-        foreach ($group as $users) {
-          $usersArray = (array) $users;
-          echo "<pre>";print_r ($usersArray); echo "</pre>";
-        }
-      }
     }
 
     $table->print_html();
