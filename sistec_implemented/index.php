@@ -325,7 +325,7 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 			and u.id = cc.userid and cc.course = c.id
 			ORDER BY c.shortname, u.firstname, u.lastname
 			";*/
-      $sql =   "SELECT * FROM (SELECT u.firstname,
+      $sql =   "SELECT u.firstname,
                 u.lastname,
                 c.shortname,
                 cc.timecompleted,
@@ -335,7 +335,7 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
                 JOIN {course} c ON c.id = cc.course
                 JOIN {user} u ON u.id = cc.userid
                 WHERE cc.timecompleted between $startdate and $enddate
-                ORDER BY c.shortname) AS secondQuery
+                ORDER BY c.shortname, u.firstname
                 ";
 	}else{
 		$sql = "SELECT cc.userid, u.firstname, u.lastname, cc.timecompleted
@@ -354,7 +354,7 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
         $users = array(); // tablelib will handle saying 'Nothing to display' for us.
     }
 
-    echo "<pre>";print_r($users);echo "</pre>";
+    //echo "<pre>";print_r($users);echo "</pre>";
 
 	   //echo count($users);
 
@@ -406,7 +406,8 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 		$inscricao = (isset($_GET["dia"]) && $_GET["dia"] == 1) ? date('d/m/Y H:i:s', $u->timecompleted): "";
 
 		if($tudo == 1){
-			if($cursoid != $u->course){
+      $arrayCursos = array();
+      if($cursoid != $u->course){
 				$cursoid = $u->course;
 				$data = array('<b>'.$u->shortname.'</b>',$u->course,'-');
 				$table->add_data($data);
