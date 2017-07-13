@@ -321,6 +321,7 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 			/*$sql = "SELECT cc.course, c.shortname, cc.userid, u.firstname, u.lastname, cc.timecompleted
 			FROM {user} u, {course_completions} cc, {course} c
 			WHERE cc.timecompleted between $startdate and $enddate
+
 			and u.id = cc.userid and cc.course = c.id
 			ORDER BY c.shortname, u.firstname, u.lastname
 			";*/
@@ -331,8 +332,8 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
                 cc.course,
                 cc.userid
                 FROM {course_completions} cc
-                INNER JOIN {course} c ON c.id = cc.course
-                INNER JOIN {user} u ON u.id = cc.userid
+                JOIN {course} c ON c.id = cc.course
+                JOIN {user} u ON u.id = cc.userid
                 WHERE cc.timecompleted between $startdate and $enddate
                 ORDER BY c.shortname, u.firstname
                 ";
@@ -389,48 +390,7 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 		echo "</pre>";
 
 		*/
-
-    if($tudo == 1){
-      $sortedUsers = array();
-        foreach ($users as $arrayUser) {
-           $sortedUsers[$arrayUser->shortname][] = $arrayUser;
-        }
-
-        ksort($sortedUsers);
-
-        foreach ($sortedUsers as $users) {
-
-          $data = array('<b>'.$users[0]->shortname.'</b>',$users[0]->course,'-');
-  				$table->add_data($data);
-          asort($users);
-
-          foreach ($users as $user) {
-            $sql = "SELECT ud.data
-        		FROM {user_info_data} ud
-        		JOIN {user_info_field} uf ON uf.id = ud.fieldid
-        		WHERE ud.userid = :userid AND uf.shortname = :fieldname";
-
-            $params = array('userid' =>  $user->userid, 'fieldname' => 'CPF');
-
-            $cpf = $DB->get_field_sql($sql, $params);
-        		$cpf = str_replace(".", "", $cpf);
-        		$cpf = str_replace("-", "", $cpf);
-        		$cpf = str_replace(",", "", $cpf);
-        		$cpf = str_replace(" ", "", $cpf);
-
-            $inscricao = (isset($_GET["dia"]) && $_GET["dia"] == 1) ? date('d/m/Y H:i:s', $user->timecompleted): "";
-
-            $data = array ($cpf, $user->firstname.' '.$user->lastname, $inscricao);
-        		$cpfs.=$cpf.'; ';
-
-            $table->add_data($data);
-          }
-        }
-    }
-
-    else{
-
-    $cursoid = 0;
+	$cursoid = 0;
     foreach ($users as $u) {
 		$sql = "SELECT ud.data
 		FROM {user_info_data} ud
@@ -445,13 +405,14 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 
 		$inscricao = (isset($_GET["dia"]) && $_GET["dia"] == 1) ? date('d/m/Y H:i:s', $u->timecompleted): "";
 
-		/*if($tudo == 1){
+		if($tudo == 1){
+      $arrayCursos = array();
       if($cursoid != $u->course){
 				$cursoid = $u->course;
 				$data = array('<b>'.$u->shortname.'</b>',$u->course,'-');
 				$table->add_data($data);
 			}
-		}*/
+		}
 
 		$data = array ($cpf, $u->firstname.' '.$u->lastname, $inscricao);
 		$cpfs.=$cpf.'; ';
@@ -463,13 +424,10 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
                       );*/
         $table->add_data($data);
     }
-  }
 
     $table->print_html();
 	echo "CPF: ".$cpfs;
-  echo "<br><br>Total: ".count($users);
-
-
+	echo "<br><br>Total: ".count($users);
     /*if ($perpage == SHOW_ALL_PAGE_SIZE) {
         echo '<div id="showall"><a href="'.$baseurl.'&amp;perpage='.DEFAULT_PAGE_SIZE.'">'.get_string('showperpage', '', DEFAULT_PAGE_SIZE).'</a></div>'."\n";
     }
