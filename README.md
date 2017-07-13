@@ -1,4 +1,5 @@
-# reportsistec
-Plugin de relatório para o SISTEC - Moodle
+# reportsistec -- Moodle
 
-Linguagens utilizadas: PHP, mySQL, HTML, CSS e JS.
+Plugin to generate users report for SISTEC. 
+
+Built with: PHP, mySQL, HTML, CSS e JS.
