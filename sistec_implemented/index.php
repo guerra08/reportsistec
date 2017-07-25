@@ -1,4 +1,5 @@
 <?php
+echo '<link rel="stylesheet" type="text/css" href="styles.css">';
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -153,66 +154,23 @@ $roleoptions = role_fix_names($roles, $context, ROLENAME_ALIAS, true);
 // print first controls.
 echo '<form class="sistecselectform" action="index.php" method="get"><div>'."\n".
      '<input type="hidden" name="id" value="'.$course->id.'" />'."\n";
-/*echo '<label for="menuinstanceid">'.get_string('activitymodule').'</label>'."\n";
-echo html_writer::select($instanceoptions, 'instanceid', $instanceid);
-echo '<label for="menutimefrom">'.get_string('lookback').'</label>'."\n";
-echo html_writer::select($timeoptions,'timefrom',$timefrom);*/
-echo '<label for="menuroleid">'.get_string('showonly').'</label>'."\n";
+echo '<label for="menuroleid">Filtros</label>'."\n";
 echo '<input type="hidden" name="roleid" value="1" />'."\n";
+echo '<div>';
 echo '<input type="date" name="startdate" />'."\n";
 echo '<input type="date" name="enddate" />'."\n";
-echo '<input type="checkbox" name="cpf" value = "1" /> CPFs válidos '."\n";
-echo '<input type="checkbox" name="dia" value = "1" /> Conclusão '."\n";
-echo '<input type="checkbox" name="tudo" value = "1" /> Todos os cursos '."\n";
-/*
-echo html_writer::select($roleoptions,'roleid',$roleid,false);
-echo '<label for="menuaction">'.get_string('showactions').'</label>'."\n";
-echo html_writer::select($actionoptions,'action',$action,false);*/
+echo '</div>';
+echo '<input type="checkbox" name="cpf" value = "1" /> Mostrar apenas CPFs preenchidos '."\n";
+echo '<input type="checkbox" name="dia" value = "1" /> Mostrar data de conclusão '."\n";
+echo '<input type="checkbox" name="searchAllCourses" value = "1" /> Todos os cursos '."\n";
 echo '<input type="submit" value="'.get_string('go').'" />';
 echo "\n</div></form>\n";
 
 $baseurl =  $CFG->wwwroot.'/report/sistec/index.php?id='.$course->id.'&amp;roleid='
     .$roleid.'&amp;timefrom='.$timefrom.'&amp;action='.$action.'&amp;perpage='.$perpage;
-/*$select = groups_allgroups_course_menu($course, $baseurl, true, $currentgroup);
 
-// User cannot see any group.
-if (empty($select)) {
-    echo $OUTPUT->heading(get_string("notingroup"));
-    echo $OUTPUT->footer();
-    exit;
-} else {
-    echo $select;
-}
+if (!empty($roleid)) {
 
-// Fetch current active group.
-$groupmode = groups_get_course_groupmode($course);
-$currentgroup = $SESSION->activegroup[$course->id][$groupmode][$course->defaultgroupingid];
-*/
-if (/*!empty($instanceid) && */!empty($roleid)) {
-    // from here assume we have at least the module we're using.
-    //$cm = $modinfo->cms[$instanceid];
-/*
-    // Group security checks.
-    if (!groups_group_visible($currentgroup, $course, $cm)) {
-        echo $OUTPUT->heading(get_string("notingroup"));
-        echo $OUTPUT->footer();
-        exit;
-    }
-
-    $modulename = get_string('modulename', $cm->modname);
-
-    include_once($CFG->dirroot.'/mod/'.$cm->modname.'/lib.php');
-
-    $viewfun = $cm->modname.'_get_view_actions';
-    $postfun = $cm->modname.'_get_post_actions';
-
-    if (!function_exists($viewfun) || !function_exists($postfun)) {
-        print_error('modulemissingcode', 'error', $baseurl, $cm->modname);
-    }
-
-    $viewnames = $viewfun();
-    $postnames = $postfun();
-*/
     $table = new flexible_table('course-sistec-'.$course->id.'-'.$cm->id.'-'.$roleid);
     $table->course = $course;
 
@@ -235,95 +193,20 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
                                         TABLE_VAR_PAGE    => 'spage'
                                         ));
     $table->setup();
-/*
-    switch ($action) {
-        case 'view':
-            $actions = $viewnames;
-            break;
-        case 'post':
-            $actions = $postnames;
-            break;
-        default:
-            // some modules have stuff we want to hide, ie mail blocked etc so do actually need to limit here.
-            $actions = array_merge($viewnames, $postnames);
-    }*/
 
-    /*list($actionsql, $params) = $DB->get_in_or_equal($actions, SQL_PARAMS_NAMED, 'action');
-    $actionsql = "action $actionsql";
-
-    // We want to query both the current context and parent contexts.
-    list($relatedctxsql, $relatedctxparams) = $DB->get_in_or_equal($context->get_parent_context_ids(true), SQL_PARAMS_NAMED, 'relatedctx');
-
-    $groupsql = "";
-    if (!empty($currentgroup)) {
-        $groupsql = "JOIN {groups_members} gm ON (gm.userid = u.id AND gm.groupid = :groupid)";
-        $params['groupid'] = $currentgroup;
-    }
-
-    $sql = "SELECT ra.userid, u.firstname, u.lastname, u.idnumber, l.actioncount AS count
-            FROM (SELECT * FROM {role_assignments} WHERE contextid $relatedctxsql AND roleid = :roleid ) ra
-            JOIN {user} u ON u.id = ra.userid
-            $groupsql
-            LEFT JOIN (
-                SELECT userid, COUNT(action) AS actioncount FROM {log} WHERE cmid = :instanceid AND time > :timefrom AND $actionsql GROUP BY userid
-            ) l ON (l.userid = ra.userid)";
-    $params = array_merge($params, $relatedctxparams);
-    $params['roleid'] = $roleid;
-    $params['instanceid'] = $instanceid;
-    $params['timefrom'] = $timefrom;
-
-    list($twhere, $tparams) = $table->get_sql_where();
-    if ($twhere) {
-        $sql .= ' WHERE '.$twhere; //initial bar
-        $params = array_merge($params, $tparams);
-    }
-
-    if ($table->get_sql_sort()) {
-        $sql .= ' ORDER BY '.$table->get_sql_sort();
-    }
-
-
-
-    $countsql = "SELECT COUNT(DISTINCT(ra.userid))
-                   FROM {role_assignments} ra
-                   JOIN {user} u ON u.id = ra.userid
-                   $groupsql
-                  WHERE ra.contextid $relatedctxsql AND ra.roleid = :roleid";
-
-    $totalcount = $DB->count_records_sql($countsql, $params);
-
-    if ($twhere) {
-        $matchcount = $DB->count_records_sql($countsql.' AND '.$twhere, $params);
-    } else {
-        $matchcount = $totalcount;
-    }
-*/
     echo '<div id="sistecreport">' . "\n";
-   // echo '<p class="modulename">'.$modulename . ' ' . $strviews.': '.implode(', ',$viewnames).'<br />'."\n"
-     //   . $modulename . ' ' . $strposts.': '.implode(', ',$postnames).'</p>'."\n";
 
-    /*$table->initialbars($totalcount > $perpage);
-    $table->pagesize($perpage, $matchcount);
-*/
-	/* NOSSO SQL */
-	$startdate = (isset($_GET['startdate'])) ? mktime(0,0,0,substr($_GET['startdate'],5,2),substr($_GET['startdate'],8,2),substr($_GET['startdate'],0,4)) : time()-60*60*24*30;
+	/*VERIFIES IF GET VALUES ARE SETTED*/
+
+  $startdate = (isset($_GET['startdate'])) ? mktime(0,0,0,substr($_GET['startdate'],5,2),substr($_GET['startdate'],8,2),substr($_GET['startdate'],0,4)) : time()-60*60*24*30;
 	$enddate = (isset($_GET['enddate'])) ? mktime(0,0,0,substr($_GET['enddate'],5,2),substr($_GET['enddate'],8,2),substr($_GET['enddate'],0,4)) : time();
-	$tudo = (isset($_GET['tudo'])) ? 1: 0;
+	$searchAllCourses = (isset($_GET['searchAllCourses'])) ? 1: 0;
+  $validateCPF = (isset($_GET['cpf']) && $_GET['cpf'] == 1) ? 1: 0;
 
-	/*$sql = "SELECT cmc.userid, u.firstname, u.lastname, cmc.timemodified
-			FROM {user} u, {course_modules_completion} cmc, {course_modules} cm, {modules} m
-			WHERE cmc.timemodified between $startdate and $enddate
-			and cmc.completionstate = '1' and  m.name = 'simplecertificate' and cm.course = '".$id."'
-			and u.id = cmc.userid and cmc.coursemoduleid = cm.id and cm.module = m.id
-			ORDER BY u.firstname, u.lastname
-			";*/
-	if($tudo == 1){
-			/*$sql = "SELECT cc.course, c.shortname, cc.userid, u.firstname, u.lastname, cc.timecompleted
-			FROM {user} u, {course_completions} cc, {course} c
-			WHERE cc.timecompleted between $startdate and $enddate
-			and u.id = cc.userid and cc.course = c.id
-			ORDER BY c.shortname, u.firstname, u.lastname
-			";*/
+	if($searchAllCourses == 1){
+
+    /* IF SEARCH FOR ALL COURSES IS SELECTED, THE FOLLOWING SQL QUERY IS APPLIED */
+
       $sql =   "SELECT u.firstname,
                 u.lastname,
                 c.shortname,
@@ -336,7 +219,11 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
                 WHERE cc.timecompleted between $startdate and $enddate
                 ORDER BY c.shortname, u.firstname
                 ";
-	}else{
+	}
+
+  /* IF IT'S NOT SELECTED, THE DEFAULT QUERY IS USED */
+
+  else {
 		$sql = "SELECT cc.userid, u.firstname, u.lastname, cc.timecompleted
 			FROM {user} u, {course_completions} cc
 			WHERE cc.timecompleted between $startdate and $enddate
@@ -346,51 +233,23 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
 			";
 	}
 
-	/* FIM DO NOSSO SQL */
-	//print_r($DB->get_records_sql($sql));
-
+/* IF THE QUERY IS NOT SUCCESSFUL, THE ARRAY USERS IS LEFT BLANK, OTHERWISE, IT WILL STORE THE QUERY RESULTS */
     if (!$users = $DB->get_records_sql($sql)) {
         $users = array(); // tablelib will handle saying 'Nothing to display' for us.
     }
-
-    //echo "<pre>";print_r($users);echo "</pre>";
-
-	   //echo count($users);
 
     $data = array();
 
     $a = new stdClass();
     $a->count = count($users);
     $a->items = $role->name;
-/*
-    if ($matchcount != $totalcount) {
-        $a->count = $matchcount.'/'.$a->count;
-    }*/
 
-    echo '<h2>'.get_string('counteditems', '', $a).'</h2>'."\n";
+    echo '<h3>Concluintes (com e sem CPF): '.get_string('counteditems', '', $a).'</h3>'."\n";
 
-    /*echo '<form action="'.$CFG->wwwroot.'/user/action_redir.php" method="post" id="studentsform">'."\n";
-    echo '<div>'."\n";
-    echo '<input type="hidden" name="id" value="'.$id.'" />'."\n";
-    echo '<input type="hidden" name="returnto" value="'. s($PAGE->url) .'" />'."\n";
-    echo '<input type="hidden" name="sesskey" value="'.sesskey().'" />'."\n";*/
+	  $cpfs = "";
 
-	$cpfs = "";
-
-	/* Buscar CPF
-	$sql3 = "SELECT u.id, u.firstname, ud.data
-		FROM {user_info_data} ud, {user}  u, {user_info_field} uf
-		WHERE ud.userid = u.id and uf.id = ud.fieldid";
-		$listacpf = $DB->get_records_sql($sql3);
-		echo "<pre>";
-		foreach ($listacpf as $l){
-			print_r($l);
-		}
-		echo "</pre>";
-
-		*/
-
-    if($tudo == 1){
+    if($searchAllCourses == 1){
+      $countUsers = 0;
       $sortedUsers = array();
         foreach ($users as $arrayUser) {
            $sortedUsers[$arrayUser->shortname][] = $arrayUser;
@@ -399,12 +258,12 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
         ksort($sortedUsers);
 
         foreach ($sortedUsers as $users) {
-
-          $data = array('<b>'.$users[0]->shortname.'</b>',$users[0]->course,'-');
-  				$table->add_data($data);
+          $data = array('<b>'.$users[0]->shortname.'</b>' ,'<b>'.$users[0]->course.'</b>','-');
+          $table->add_data($data);
           asort($users);
 
           foreach ($users as $user) {
+            $countUsers ++;
             $sql = "SELECT ud.data
         		FROM {user_info_data} ud
         		JOIN {user_info_field} uf ON uf.id = ud.fieldid
@@ -423,78 +282,63 @@ if (/*!empty($instanceid) && */!empty($roleid)) {
             $data = array ($cpf, $user->firstname.' '.$user->lastname, $inscricao);
         		$cpfs.=$cpf.'; ';
 
-            $table->add_data($data);
+            if(isset($validateCPF)&& $validateCPF == 1){
+              if($cpf == ''){
+                $countUsers--;
+              }else{
+                $table->add_data($data);
+              }
+            }
+            else{
+              $table->add_data($data);
+            }
           }
         }
-    }
-
-    else{
+      } elseif($searchAllCourses !== 1 || !isset($searchAllCourses)) {
 
     $cursoid = 0;
     foreach ($users as $u) {
-		$sql = "SELECT ud.data
-		FROM {user_info_data} ud
-		JOIN {user_info_field} uf ON uf.id = ud.fieldid
-		WHERE ud.userid = :userid AND uf.shortname = :fieldname";
-		$params = array('userid' =>  $u->userid, 'fieldname' => 'CPF');
-		$cpf = $DB->get_field_sql($sql, $params);
-		$cpf = str_replace(".", "", $cpf);
-		$cpf = str_replace("-", "", $cpf);
-		$cpf = str_replace(",", "", $cpf);
-		$cpf = str_replace(" ", "", $cpf);
 
-		$inscricao = (isset($_GET["dia"]) && $_GET["dia"] == 1) ? date('d/m/Y H:i:s', $u->timecompleted): "";
+		  $sql = "SELECT ud.data
 
-		/*if($tudo == 1){
-      if($cursoid != $u->course){
-				$cursoid = $u->course;
-				$data = array('<b>'.$u->shortname.'</b>',$u->course,'-');
-				$table->add_data($data);
-			}
-		}*/
+  		FROM {user_info_data} ud
+  		JOIN {user_info_field} uf ON uf.id = ud.fieldid
+  		WHERE ud.userid = :userid AND uf.shortname = :fieldname";
+  		$params = array('userid' =>  $u->userid, 'fieldname' => 'CPF');
+  		$cpf = $DB->get_field_sql($sql, $params);
+  		$cpf = str_replace(".", "", $cpf);
+  		$cpf = str_replace("-", "", $cpf);
+  		$cpf = str_replace(",", "", $cpf);
+  		$cpf = str_replace(" ", "", $cpf);
 
-		$data = array ($cpf, $u->firstname.' '.$u->lastname, $inscricao);
-		$cpfs.=$cpf.'; ';
+  		$inscricao = (isset($_GET["dia"]) && $_GET["dia"] == 1) ? date('d/m/Y H:i:s', $u->timecompleted): "";
 
-		/*
-        $data = array('<a href="'.$CFG->wwwroot.'/user/view.php?id='.$u->userid.'&amp;course='.$course->id.'">'.fullname($u,true).'</a>'."\n",
-                      ((!empty($u->count)) ? get_string('yes').' ('.$u->count.') ' : get_string('no')),
-                      '<input type="checkbox" class="usercheckbox" name="user'.$u->userid.'" value="'.$u->count.'" />'."\n",
-                      );*/
+  		$data = array ($cpf, $u->firstname.' '.$u->lastname, $inscricao);
+
+      if(isset($validateCPF) && $validateCPF == 1){
+        if($cpf == ''){
+          unset($data);
+        }
+      }
+
+  		$cpfs.=$cpf.'; ';
+
+      if(isset($data)){
         $table->add_data($data);
+      }
     }
   }
 
     $table->print_html();
-	echo "CPF: ".$cpfs;
-  echo "<br><br>Total: ".count($users);
 
+    echo "CPF: ".$cpfs;
 
-    /*if ($perpage == SHOW_ALL_PAGE_SIZE) {
-        echo '<div id="showall"><a href="'.$baseurl.'&amp;perpage='.DEFAULT_PAGE_SIZE.'">'.get_string('showperpage', '', DEFAULT_PAGE_SIZE).'</a></div>'."\n";
-    }
-    else if ($matchcount > 0 && $perpage < $matchcount) {
-        echo '<div id="showall"><a href="'.$baseurl.'&amp;perpage='.SHOW_ALL_PAGE_SIZE.'">'.get_string('showall', '', $matchcount).'</a></div>'."\n";
+    if($searchAllCourses == 1){
+      echo "<br><br>Total de CPFs: ".$countUsers;
+    }else{
+      echo "<br><br>Total de CPFs: ".count($users);
     }
 
-    echo '<div class="selectbuttons">';
-    echo '<input type="button" id="checkall" value="'.get_string('selectall').'" /> '."\n";
-    echo '<input type="button" id="checknone" value="'.get_string('deselectall').'" /> '."\n";
-    if ($perpage >= $matchcount) {
-        echo '<input type="button" id="checknos" value="'.get_string('selectnos').'" />'."\n";
-    }
-    echo '</div>';
-    echo '<div>';
-    echo html_writer::label(get_string('withselectedusers'), 'formactionselect');
-    $displaylist['messageselect.php'] = get_string('messageselectadd');
-    echo html_writer::select($displaylist, 'formaction', '', array(''=>'choosedots'), array('id'=>'formactionselect'));
-    echo $OUTPUT->help_icon('withselectedusers');
-    echo '<input type="submit" value="' . get_string('ok') . '" />'."\n";
-    echo '</div>';
-    echo '</div>'."\n";
-    echo '</form>'."\n";
-    echo '</div>'."\n";
-*/
     $PAGE->requires->js_init_call('M.report_sistec.init');
 }
 
